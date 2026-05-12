@@ -1,11 +1,10 @@
-<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="800" height="800" fill="#0A0A0A"/>
-  <circle cx="400" cy="400" r="290" stroke="#D8D3CC" stroke-width="16"/>
-  <circle cx="400" cy="400" r="220" stroke="#D8D3CC" stroke-width="10" opacity="0.9"/>
-  <path d="M398 520C406 455 410 400 410 340C448 300 470 265 488 220C474 244 446 265 422 278C428 236 440 194 458 150C420 200 386 246 360 286C320 274 286 262 246 236C278 276 314 304 344 322C310 368 278 400 228 430C286 426 330 414 360 394C358 438 352 480 338 548L398 520Z" fill="#D8D3CC"/>
-  <defs>
-    <filter id="glow" x="0" y="0" width="800" height="800">
-      <feGaussianBlur stdDeviation="8" result="blur"/>
-    </filter>
-  </defs>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" fill="#151513"/>
+  <circle cx="512" cy="512" r="330" fill="none" stroke="#c7c2b8" stroke-width="18"/>
+  <circle cx="512" cy="512" r="250" fill="none" stroke="#c7c2b8" stroke-width="12"/>
+  <text x="512" y="250" text-anchor="middle" fill="#c7c2b8" font-family="Georgia, 'Times New Roman', serif" font-size="82" font-weight="700" letter-spacing="14">BLACKTHORN</text>
+  <text x="512" y="810" text-anchor="middle" fill="#c7c2b8" font-family="Georgia, 'Times New Roman', serif" font-size="76" font-weight="700" letter-spacing="10">ENTERPRISES</text>
+  <path d="M505 665 C526 570 526 486 538 397 C576 357 600 307 626 247 C582 303 544 338 514 351 C481 341 445 323 405 299 C439 343 472 373 499 392 C465 438 425 475 365 512 C425 505 475 488 503 462 C503 536 492 601 456 701 Z" fill="#c7c2b8"/>
+  <path d="M527 517 C574 497 612 468 650 426 C607 443 567 452 532 452 Z" fill="#c7c2b8"/>
+  <path d="M496 455 C449 448 407 433 361 404 C400 449 444 476 489 487 Z" fill="#c7c2b8"/>
 </svg>
