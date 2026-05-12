@@ -1,0 +1,11 @@
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="800" fill="#0A0A0A"/>
+  <circle cx="400" cy="400" r="290" stroke="#D8D3CC" stroke-width="16"/>
+  <circle cx="400" cy="400" r="220" stroke="#D8D3CC" stroke-width="10" opacity="0.9"/>
+  <path d="M398 520C406 455 410 400 410 340C448 300 470 265 488 220C474 244 446 265 422 278C428 236 440 194 458 150C420 200 386 246 360 286C320 274 286 262 246 236C278 276 314 304 344 322C310 368 278 400 228 430C286 426 330 414 360 394C358 438 352 480 338 548L398 520Z" fill="#D8D3CC"/>
+  <defs>
+    <filter id="glow" x="0" y="0" width="800" height="800">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+    </filter>
+  </defs>
+</svg>
