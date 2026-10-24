@@ -48,6 +48,18 @@ async function inspect(browser, slug, label, url, mode) {
     }
     const width = await page.evaluate(() => document.documentElement.scrollWidth);
     result.horizontalOverflowPx = Math.max(0, width - (mode === "mobile" ? 390 : 1440));
+    if (result.horizontalOverflowPx > 4) {
+      result.overflowOffenders = await page.evaluate(() =>
+        [...document.querySelectorAll("body *")].map((element) => {
+          const box = element.getBoundingClientRect();
+          const name = element.tagName.toLowerCase();
+          const cls = typeof element.className === "string" ? element.className : "";
+          return { tag: name, className: cls.slice(0, 70), id: element.id || "", right: Math.round(box.right), width: Math.round(box.width) };
+        }).filter((entry) => entry.right > window.innerWidth + 4)
+          .sort((a, b) => b.right - a.right).slice(0, 10)
+      );
+      console.log("OVERFLOW DIAGNOSTIC", label, mode, JSON.stringify(result.overflowOffenders));
+    }
     const warnings = [];
     if (!result.hasMain) warnings.push("no main landmark");
     if (!result.hasH1) warnings.push("no H1");
