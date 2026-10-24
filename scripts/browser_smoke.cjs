@@ -31,6 +31,16 @@ async function inspect(browser, slug, label, url, mode) {
   page.on("pageerror", (error) => result.pageErrors.push(String(error).slice(0, 180)));
   try {
     const response = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 18_000 });
+    // DOMContentLoaded alone may precede stylesheet completion and cause false
+    // mobile-overflow reports. Wait for the load event before measurements.
+    try {
+      await page.waitForLoadState("load", { timeout: 20_000 });
+      result.loadState = "complete";
+    } catch {
+      result.loadState = "timeout";
+    }
+    // Allow one layout tick after fonts/styles resolve, without hiding network errors.
+    await page.waitForTimeout(350);
     const finalUrl = page.url();
     const status = response ? response.status() : null;
     result.finalUrl = finalUrl;
@@ -61,6 +71,7 @@ async function inspect(browser, slug, label, url, mode) {
       console.log("OVERFLOW DIAGNOSTIC", label, mode, JSON.stringify(result.overflowOffenders));
     }
     const warnings = [];
+    if (result.loadState === "timeout") warnings.push("full resource load timed out (layout results may be incomplete)");
     if (!result.hasMain) warnings.push("no main landmark");
     if (!result.hasH1) warnings.push("no H1");
     if (result.skipLink !== "focusable-first") warnings.push("skip link: " + result.skipLink);
