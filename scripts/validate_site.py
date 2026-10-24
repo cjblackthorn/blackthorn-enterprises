@@ -20,6 +20,7 @@ class SiteHTML(HTMLParser):
         self.fragments: list[str] = []
         self.errors: list[str] = []
         self.mains: list[dict[str, str]] = []
+        self.brand_logos: list[dict[str, str]] = []
         self.h1_count = 0
         self.skip_links: list[str] = []
         self.html_lang: str | None = None
@@ -37,6 +38,8 @@ class SiteHTML(HTMLParser):
             self.h1_count += 1
         if values.get("id"):
             self.ids.append(values["id"])
+        if tag == "img" and "brand-logo" in (values.get("class") or "").split():
+            self.brand_logos.append(values)
         if tag == "img" and "alt" not in values:
             self.errors.append(f"Image {values.get('src', '(missing src)')} has no alt attribute")
         if tag == "a" and "skip-link" in (values.get("class") or "").split():
@@ -63,6 +66,11 @@ def main() -> int:
     page = SiteHTML()
     page.feed(html_path.read_text(encoding="utf-8"))
     issues.extend(page.errors)
+    if not page.brand_logos:
+        issues.append("No brand-card logos found")
+    for image in page.brand_logos:
+        if image.get("loading") != "lazy" or image.get("decoding") != "async":
+            issues.append(f"Brand-card image lacks lazy/async loading: {image.get('src')}")
 
     if page.html_lang != "en":
         issues.append("Expected html lang=en")
