@@ -39,3 +39,33 @@ After settings are applied, verify the repository branch API reports `protected:
 - No raw finding/credential should be published in public CI logs or PR comments.
 - `main` releases should be gated by supported checks and rules without stopping valid rollbacks.
 - Security headers and edge-policy limitations on GitHub Pages remain separate risk decisions; do not migrate hosts merely to produce a scanner score.
+
+## Field Notes: compare current-tree and historical detections (October 24, 2026)
+
+Two independent **redacted** checks need investigation: the ten-repository historical scan ([portfolio PR #19](https://github.com/cjblackthorn/blackthorn-enterprises/pull/19)) and the current-tracked-tree check ([Field Notes PR #76](https://github.com/cjblackthorn/cjblackthorn.github.io/pull/76)). Both reported a potential finding; it is **not established** whether either represents a real, usable secret, or whether they refer to the same underlying text. Leave both PRs unmerged while unresolved.
+
+On a trusted administrator-controlled machine, clone Field Notes into a **private** directory (never use a public fork or post excerpts in issues). Use the same pinned Gitleaks v8.30.1 as CI and keep reports outside the repository. Below is an example, executed in the Field Notes checkout. The command deliberately produces no match output in the terminal:
+
+```bash
+git fetch --all --tags
+mkdir -p "$HOME/.blackthorn-security/field-notes/current-tree"
+chmod 700 "$HOME/.blackthorn-security" "$HOME/.blackthorn-security/field-notes" "$HOME/.blackthorn-security/field-notes/current-tree"
+git archive --format=tar HEAD | tar -xf - -C "$HOME/.blackthorn-security/field-notes/current-tree"
+
+docker run --rm \
+  -v "$HOME/.blackthorn-security/field-notes/current-tree:/repo:ro" \
+  -v "$HOME/.blackthorn-security/field-notes:/out" \
+  ghcr.io/gitleaks/gitleaks:v8.30.1 \
+  dir /repo --no-banner --redact=100 --log-level error \
+  --report-format json --report-path /out/private-current-tree.json \
+  >"$HOME/.blackthorn-security/field-notes/private-current-tree.log" 2>&1
+chmod 600 "$HOME/.blackthorn-security/field-notes/private-current-tree.json" "$HOME/.blackthorn-security/field-notes/private-current-tree.log"
+```
+
+The full-history command is in the previous section. Use a **different** report filename for the history run (for example, `private-history.json`), keeping both files outside the checkout. Gitleaks exit code **1** is a detection, not proof that a credential works. Other nonzero codes may represent scanning errors. The JSON can include sensitive matched text, file paths, commit IDs, and context even when CLI output is redacted; treat the reports as secrets.
+
+Privately identify each candidate's rule, source, age and purpose. Determine whether a current-file finding and historical match are the same candidate. Check whether each value is a real credential or an instructional example, expired test fixture, or false positive. If any genuine credential was ever published, revoke/rotate it **with the issuing provider**, check available access logs, and remove it from the working tree. A Git revert or history rewrite alone does not invalidate an exposed credential.
+
+For benign findings, privately document why they are benign. If a rule exclusion is necessary, scope it **only** to the verified false positive with justification, never an entire rule category or repository. Re-run both independent scans after remediation, and check current releases before declaring the gate ready.
+
+**Do not** upload reports, matched values, original secret-bearing snippets, or detailed locations into public workflows, GitHub issues, pull requests, screenshots or chat. Only share a sanitized outcome such as `false positive privately verified`, `credential revoked and replaced`, or `investigation still open`.
