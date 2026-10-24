@@ -1,0 +1,44 @@
+name: Observe protected website release branches
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '15 16 * * 2'
+  push:
+    branches:
+      - ops/private-secret-triage-and-branch-status-20261024
+      - main
+    paths:
+      - 'scripts/audit_branch_rules.py'
+      - '.github/workflows/branch-rules-audit.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/audit_branch_rules.py'
+      - '.github/workflows/branch-rules-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  read-branch-status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Verify audit script syntax
+        run: python3 -m py_compile scripts/audit_branch_rules.py
+      - name: Observe GitHub main branch protections
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/audit_branch_rules.py
+      - name: Retain non-sensitive branch metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: branch-release-protection
+          path: branch-protection-audit.json
+          if-no-files-found: warn
+          retention-days: 14
