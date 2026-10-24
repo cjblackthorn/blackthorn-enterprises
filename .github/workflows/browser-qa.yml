@@ -1,0 +1,49 @@
+name: Read-only cross-site browser QA
+
+on:
+  push:
+    branches:
+      - main
+      - qa/cross-site-browser-smoke-20261024
+    paths:
+      - scripts/check_browser_sites.py
+      - .github/workflows/browser-qa.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - scripts/check_browser_sites.py
+      - .github/workflows/browser-qa.yml
+  schedule:
+    - cron: '0 16 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  desktop-mobile-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout QA scripts
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install pinned browser test dependencies
+        run: |
+          python -m pip install --disable-pip-version-check playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Check public pages using verified-TLS Chromium
+        run: python scripts/check_browser_sites.py
+      - name: Archive JSON evidence and mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blackthorn-browser-qa
+          path: browser-qa-results/
+          if-no-files-found: warn
+          retention-days: 14
