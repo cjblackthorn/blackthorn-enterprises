@@ -10,22 +10,25 @@ The repositories have gained reviewable PR/build validation, incremental accessi
 - The personal Astro site's checkout/setup/upload/deploy action upgrades and résumé replacement shipped with successful production checks.
 - TechNerd's Pages permissions are limited to deployment jobs. Upload-pages-artifact@v5 and deploy-pages@v5 have each been validated on `main`. Its Jekyll sitemap and robots discovery are tested.
 - Enterprises, Rootworks, Tropical Plants static storefront, Thorns2Roses, Petal & Frame, Glass & Thorns, and Glass Rose Collective received incremental source/CI/SEO/accessibility improvements. The What's That Thing? project remains local-only and has Node 24 smoke tests; it was **not** deployed.
-- [Read-only public-site probe PR #5](https://github.com/cjblackthorn/blackthorn-enterprises/pull/5) checks 16 public homepage/resource URLs without disabling TLS verification. [Validation run 40102281615](https://github.com/cjblackthorn/blackthorn-enterprises/actions/runs/40102281615) verified **15/16**. The personal homepage and résumé URL returned HTTPS HTTP 200, and the résumé returned PDF MIME and signature bytes. Only Tropical Plants failed due a custom-domain certificate hostname mismatch.
+- The [cross-site public health test PR #11](https://github.com/cjblackthorn/blackthorn-enterprises/pull/11) verifies **18 of 18 live URLs/resources** with normal certificate verification, including the Tropical Plants HTTP→HTTPS and GitHub Pages alias redirects; [PR report #40116592515](https://github.com/cjblackthorn/blackthorn-enterprises/actions/runs/40116592515), [main Pages deployment #40116635506](https://github.com/cjblackthorn/blackthorn-enterprises/actions/runs/40116635506).
+- Tropical Plants static storefront quote/cart arithmetic, localStorage resilience, and keyboard dialog behavior are covered by Playwright tests and verified production Pages builds ([PRs #17 and #18](https://github.com/cjblackthorn/blackthorn-tropicals/pulls?q=is%3Apr+is%3Amerged)).
+- Petal & Frame desktop/mobile gallery keyboard focus, Escape/arrow navigation and focus restoration now pass Chromium regression tests; [PR #4](https://github.com/cjblackthorn/petals-and-frames/pull/4) deployed.
+- Thorns2Roses policy print behavior and 320px/390px/desktop navigation passed local Chromium tests; [PR #3](https://github.com/cjblackthorn/thorns2roses/pull/3) deployed. This does not establish legal accuracy.
 
 A successful build/upload/deployment and an HTTP 200 smoke test **do not** certify browser functionality, WCAG conformance, business accuracy, or complete security.
 
 ## Owner/admin action — do not defer
 
-### P0: Repair Tropical Plants custom-domain HTTPS
+### Resolved: Tropical Plants HTTPS — no action required
 
-[Detailed issue #14](https://github.com/cjblackthorn/blackthorn-tropicals/issues/14) contains reproduction and original certificate evidence. `tropicals.blackthorn.enterprises` resolves via CNAME to GitHub Pages but presented a certificate for `*.github.io` instead of the requested custom hostname. Normal HTTPS verification failed, and GitHub Pages redirected its alias to HTTP.
+On October 24, 2026, the owner successfully enabled **Enforce HTTPS** in GitHub Pages. [Read-only post-change verification #40114934696](https://github.com/cjblackthorn/blackthorn-tropicals/actions/runs/40114934696) confirmed:
 
-1. Sign in to GitHub and navigate to [Blackthorn Tropical Plants → Settings → Pages](https://github.com/cjblackthorn/blackthorn-tropicals/settings/pages).
-2. Verify the intended source of the deployed **static** GitHub Pages storefront and that the custom domain is exactly `tropicals.blackthorn.enterprises`.
-3. Check the custom-domain certificate provisioning status and any GitHub Pages reported errors. In DNS management, verify the intended CNAME `tropicals.blackthorn.enterprises → cjblackthorn.github.io`, absence of conflicting records, and CAA restrictions (if any).
-4. Follow GitHub Pages guidance to complete/retry certificate provisioning. Avoid deleting the domain or making broad DNS changes without considering downtime and ownership.
-5. Once GitHub provides a certificate that includes this hostname, enable **Enforce HTTPS** in Pages settings. Do not treat the existing `curl --insecure` 200 response as success.
-6. Run [Public site health checks](https://github.com/cjblackthorn/blackthorn-enterprises/actions/workflows/public-site-health.yml) manually from the Actions tab, and require that the Tropical Plants result changes to `PASS`; verify redirects remain HTTPS. Keep issue #14 open until there is evidence of a matching certificate and successful TLS validation.
+- GitHub Pages API reported `https_enforced=true` and an approved, hostname-matching certificate.
+- Plain HTTP redirects 301 to the secure custom domain.
+- HTTPS returns HTTP 200 with successful strict certificate verification.
+- The default GitHub Pages alias redirects 301 to the HTTPS custom domain.
+
+[Original HTTPS issue #14 was closed](https://github.com/cjblackthorn/blackthorn-tropicals/issues/14). The [cross-site monitoring suite](https://github.com/cjblackthorn/blackthorn-enterprises/actions/workflows/public-site-health.yml) now checks the redirects weekly. Do not change DNS/certificate settings without a new observed failure.
 
 ### P1: Confirm any separate Cloudflare/Vinext Worker
 
@@ -40,7 +43,7 @@ The custom-domain web page was proven to be the **GitHub Pages static storefront
 
 ## Work that remains in the engineering/QA backlog — not transferred to the owner
 
-- Full browser-level functional regression and WCAG 2.2 AA assessment; visual contrast, screen-reader semantics, cart/quote and contact flows, print-to-PDF, narrow layouts.
+- Remaining browser-level functional regression and WCAG 2.2 AA assessment; visual contrast, screen-reader semantics, contact/inquiry flows, actual print appearance and narrow-layout edge cases. Automated cart/quote, gallery, mobile menu and policy print checks now exist; these are not full certification.
 - Performance measurements and selective large-image optimizations, SEO/structured data review, complete external-link, secrets and security-header audit.
 - TechNerd duplicate GitHub native/custom Pages deployment consolidation after verifying the intended Pages source of truth.
 - Maintenance/rollback coverage on remaining repositories and final acceptance evidence by site.
