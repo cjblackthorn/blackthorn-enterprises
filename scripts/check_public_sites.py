@@ -17,7 +17,9 @@ from urllib.request import Request, urlopen
 CHECKS = [
     ("Blackthorn Enterprises", "https://blackthorn.enterprises/", "html"),
     ("Blackthorn Rootworks", "https://rootworks.technerd.tech/", "html"),
-    ("Tropical Plants (known TLS issue)", "https://tropicals.blackthorn.enterprises/", "html"),
+    ("Tropical Plants secure homepage", "https://tropicals.blackthorn.enterprises/", "html"),
+    ("Tropical Plants HTTP redirect", "http://tropicals.blackthorn.enterprises/", "redirect_https"),
+    ("Tropical Plants GitHub Pages alias", "https://cjblackthorn.github.io/blackthorn-tropicals/", "redirect_https"),
     ("Corrine personal site", "https://corrinejblackthorn.com/", "html"),
     ("Corrine resume PDF", "https://corrinejblackthorn.com/resume/Corrine-J-Blackthorn-Resume.pdf", "pdf"),
     ("Field Notes", "https://blackthornfieldnotes.ink/", "html"),
@@ -48,6 +50,10 @@ def probe(item):
             result["status"], result["detail"] = "INSECURE_REDIRECT", "Final URL is not HTTPS"
         elif not (200 <= code < 300):
             result["status"], result["detail"] = "HTTP_ERROR", f"HTTP {code}"
+        elif kind == "redirect_https" and final.rstrip("/") != "https://tropicals.blackthorn.enterprises":
+            result["status"], result["detail"] = "REDIRECT_MISMATCH", f"Expected secure Tropical Plants hostname; got {final}"
+        elif kind == "redirect_https" and final == url:
+            result["status"], result["detail"] = "REDIRECT_MISMATCH", "Expected HTTP or Pages alias to redirect"
         elif kind == "pdf" and (not body.startswith(b"%PDF") or "pdf" not in ctype):
             result["status"], result["detail"] = "CONTENT_MISMATCH", f"Expected PDF bytes and MIME; got {ctype}"
         elif kind == "html" and b"<html" not in body.lower():
@@ -86,7 +92,7 @@ def main():
     lines.extend([
         "",
         "Unverified or failing entries must be triaged in the [final remediation queue](https://github.com/cjblackthorn/blackthorn-enterprises/issues/4).",
-        "Tropical Plants certificate mismatch is already documented in [issue #14](https://github.com/cjblackthorn/blackthorn-tropicals/issues/14).",
+        "Tropical Plants HTTPS was repaired October 24, 2026 ([closed issue #14](https://github.com/cjblackthorn/blackthorn-tropicals/issues/14)); checks now guard against HTTP redirect and certificate regressions.",
         "This is not an interactive browser, content, security-header, or WCAG audit.",
         ""
     ])
