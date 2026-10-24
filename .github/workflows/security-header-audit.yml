@@ -1,0 +1,40 @@
+name: Audit public website security response headers
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '20 16 * * 3'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/check_security_headers.py'
+      - '.github/workflows/security-header-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/check_security_headers.py'
+      - '.github/workflows/security-header-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  header-observation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Check Python syntax
+        run: python3 -m py_compile scripts/check_security_headers.py
+      - name: Observe public response headers (strict TLS, read-only)
+        run: python3 scripts/check_security_headers.py
+      - name: Preserve inspection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-security-header-audit
+          path: header-audit-results.json
+          if-no-files-found: warn
+          retention-days: 30
