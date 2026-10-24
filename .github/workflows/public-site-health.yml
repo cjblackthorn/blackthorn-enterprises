@@ -1,0 +1,31 @@
+name: Public site health checks
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 15 * * 1'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/check_public_sites.py'
+      - '.github/workflows/public-site-health.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-urls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Probe public URLs with strict TLS and verify key content types
+        run: python3 scripts/check_public_sites.py
+      - name: Preserve the full diagnostic report
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-site-health-report
+          path: site-health-results.json
+          retention-days: 30
