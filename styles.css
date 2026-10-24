@@ -32,6 +32,31 @@ img {
   max-width: 100%;
 }
 
+/* Hidden until focused: bypass the sticky navigation with the keyboard. */
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 200;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  color: #080808;
+  background: #fff;
+  font-weight: 700;
+  transform: translateY(calc(-100% - 28px));
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* Clear focus treatment on a dark site, including button-styled links. */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid #f4ce77;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px #080808;
+}
+
 .site-header {
   position: sticky;
   top: 0;
@@ -304,4 +329,10 @@ h2 {
   h1 {
     font-size: clamp(3rem, 12vw, 5rem);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .button, .brand-card, .nav-links a, .footer-links a, .brand-card a { transition: none; }
+  .button:hover, .brand-card:hover { transform: none; }
 }
