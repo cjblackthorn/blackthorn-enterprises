@@ -7,6 +7,7 @@ from collections import Counter
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
+from xml.etree import ElementTree
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -91,6 +92,20 @@ def main() -> int:
     css = css_path.read_text(encoding="utf-8")
     if ":focus-visible" not in css or "prefers-reduced-motion" not in css:
         issues.append("Expected focus-visible and reduced-motion styles")
+
+    canonical = "https://blackthorn.enterprises/"
+    if f'<link rel="canonical" href="{canonical}" />' not in html_path.read_text(encoding="utf-8"):
+        issues.append("Enterprise homepage canonical URL missing")
+    if "Sitemap: https://blackthorn.enterprises/sitemap.xml" not in (ROOT / "robots.txt").read_text(encoding="utf-8"):
+        issues.append("robots.txt missing homepage sitemap reference")
+    try:
+        tree = ElementTree.parse(ROOT / "sitemap.xml")
+        tag = "{http://www.sitemaps.org/schemas/sitemap/0.9}"
+        urls = [v.text for v in tree.findall(f"{tag}url/{tag}loc")]
+        if urls != [canonical]:
+            issues.append(f"Incorrect sitemap URLs: {urls}")
+    except (OSError, ElementTree.ParseError) as exc:
+        issues.append(f"Invalid sitemap.xml: {exc}")
 
     if issues:
         print("Static site validation FAILED:")
