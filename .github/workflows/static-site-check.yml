@@ -1,0 +1,23 @@
+name: Validate static website
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out site
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Validate internal links, structure, assets and accessibility basics
+        run: python3 scripts/validate_site.py
